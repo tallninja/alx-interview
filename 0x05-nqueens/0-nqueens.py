@@ -1,91 +1,121 @@
 #!/usr/bin/python3
-'''N Queens Challenge'''
-
+"""
+0. N queens
+"""
 import sys
 
 
-if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print("Usage: nqueens N")
-        sys.exit(1)
+def backtracking(board, row=0, column=0):
+    """
+    method that uses the backtracking algorithm to obtain
+    all possible solutions
+    """
+    if row == len(board):
+        print_result(board)
+        return
 
+    if row == 0:
+        for column in range(len(board)):
+            board[row][column] = 1
+            backtracking(board, row + 1, 0)
+            board[row][column] = 0
+
+    else:
+        for column in range(len(board)):
+            if comprobation(board, row, column):
+                board[row][column] = 1
+                backtracking(board, row + 1, 0)
+                board[row][column] = 0
+
+
+def comprobation(board, row, column):
+    """
+    method that checks if the queen is being attacked,
+    vertically or diagonally on both sides
+    """
+    for row_2 in range(len(board)):
+        if board[row_2][column] == 1:
+            return False
+
+    row_2 = row
+    column_2 = column
+    if row != len(board) - 1 or column != 0:
+        while row_2 > 0 and column_2 > 0:
+            row_2 -= 1
+            column_2 -= 1
+
+        while row_2 < len(board) and column_2 < len(board):
+            if board[row_2][column_2] == 1:
+                return False
+            row_2 += 1
+            column_2 += 1
+
+    row_2 = row
+    column_2 = column
+    if row != len(board) - 1 or column != len(board) - 1:
+        while row_2 > 0 and column_2 < len(board) - 1:
+            row_2 -= 1
+            column_2 += 1
+
+        while row_2 < len(board) and column_2 >= 0:
+            if board[row_2][column_2] == 1:
+                return False
+            row_2 += 1
+            column_2 -= 1
+
+    return True
+
+
+def print_result(board):
+    """
+    Method that prints the location of the queen
+    through its row and column
+    """
+    result = []
+    for row in board:
+        result.append([board.index(row), row.index(1)])
+
+    print(result)
+
+
+def validate_integer(number):
+    """
+
+    """
     try:
-        n = int(sys.argv[1])
+        number = int(number)
+        return number
     except ValueError:
-        print('N must be a number')
-        exit(1)
+        return 1
+    except TypeError:
+        return 1
 
-    if n < 4:
-        print('N must be at least 4')
-        exit(1)
 
-    solutions = []
-    placed_queens = []  # coordinates format [row, column]
-    stop = False
-    r = 0
-    c = 0
+argc = len(sys.argv)
+argv = sys.argv
 
-    # iterate thru rows
-    while r < n:
-        goback = False
-        # iterate through columns
-        while c < n:
-            # check if current column is safe
-            safe = True
-            for cord in placed_queens:
-                col = cord[1]
-                if(col == c or col + (r-cord[0]) == c or
-                        col - (r-cord[0]) == c):
-                    safe = False
-                    break
+if argc != 2:
+    print("Usage: nqueens N")
+    sys.exit(1)
 
-            if not safe:
-                if c == n - 1:
-                    goback = True
-                    break
-                c += 1
-                continue
+n = validate_integer(argv[1])
 
-            # place the queen
-            cords = [r, c]
-            placed_queens.append(cords)
-            # if last row, append solution and reset all to last unfinished row
-            # and last safe column in that row
-            if r == n - 1:
-                solutions.append(placed_queens[:])
-                for cord in placed_queens:
-                    if cord[1] < n - 1:
-                        r = cord[0]
-                        c = cord[1]
-                for i in range(n - r):
-                    placed_queens.pop()
-                if r == n - 1 and c == n - 1:
-                    placed_queens = []
-                    stop = True
-                r -= 1
-                c += 1
-            else:
-                c = 0
-            break
-        if stop:
-            break
-        # on fail: go back to previous row
-        # and continue from last safe column + 1
-        if goback:
-            r -= 1
-            while r >= 0:
-                c = placed_queens[r][1] + 1
-                del placed_queens[r]  # delete previous queen coordinates
-                if c < n:
-                    break
-                r -= 1
-            if r < 0:
-                break
-            continue
-        r += 1
+if n == 1:
+    print("N must be a number")
+    sys.exit(1)
 
-    for i, val in enumerate(solutions):
-        if i == len(solutions) - 1:
-            print(val, end='')
-        else:
-            print(val)
+if n < 4:
+    print("N must be at least 4")
+    sys.exit(1)
+
+
+board = []
+row = []
+
+for i in range(n):
+    for j in range(n):
+        row.append(0)
+    board.append(row)
+    row = []
+
+backtracking(board)
